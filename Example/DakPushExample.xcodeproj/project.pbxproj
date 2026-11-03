@@ -1,0 +1,549 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		DA0000000000000000000024 /* DakPush in Frameworks */ = {isa = PBXBuildFile; productRef = DA000000000000000000002D /* DakPush */; };
+		DA0000000000000000000025 /* DakPushExtension in Frameworks */ = {isa = PBXBuildFile; productRef = DA000000000000000000002E /* DakPushExtension */; };
+		DA0000000000000000000026 /* NotificationService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = DA000000000000000000000C /* NotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		DA0000000000000000000028 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DA0000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DA000000000000000000000B;
+			remoteInfo = NotificationService;
+		};
+		DA0000000000000000000029 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DA0000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DA0000000000000000000002;
+			remoteInfo = DakPushExample;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		DA0000000000000000000027 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				DA0000000000000000000026 /* NotificationService.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		DA0000000000000000000003 /* DakPushExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DakPushExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DA000000000000000000000C /* NotificationService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NotificationService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		DA0000000000000000000015 /* DakPushExampleTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DakPushExampleTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		DA0000000000000000000023 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		DA0000000000000000000004 /* DakPushExample */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = DakPushExample;
+			sourceTree = "<group>";
+		};
+		DA000000000000000000000D /* NotificationService */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = NotificationService;
+			sourceTree = "<group>";
+		};
+		DA0000000000000000000016 /* DakPushExampleTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = DakPushExampleTests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		DA0000000000000000000006 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DA0000000000000000000024 /* DakPush in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DA000000000000000000000F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DA0000000000000000000025 /* DakPushExtension in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DA0000000000000000000018 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		DA0000000000000000000020 = {
+			isa = PBXGroup;
+			children = (
+				DA0000000000000000000004 /* DakPushExample */,
+				DA000000000000000000000D /* NotificationService */,
+				DA0000000000000000000016 /* DakPushExampleTests */,
+				DA0000000000000000000021 /* Config */,
+				DA0000000000000000000022 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		DA0000000000000000000021 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				DA0000000000000000000023 /* Config.xcconfig */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+		DA0000000000000000000022 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				DA0000000000000000000003 /* DakPushExample.app */,
+				DA000000000000000000000C /* NotificationService.appex */,
+				DA0000000000000000000015 /* DakPushExampleTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		DA0000000000000000000002 /* DakPushExample */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DA0000000000000000000008 /* Build configuration list for PBXNativeTarget "DakPushExample" */;
+			buildPhases = (
+				DA0000000000000000000005 /* Sources */,
+				DA0000000000000000000006 /* Frameworks */,
+				DA0000000000000000000007 /* Resources */,
+				DA0000000000000000000027 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				DA000000000000000000002A /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				DA0000000000000000000004 /* DakPushExample */,
+			);
+			name = DakPushExample;
+			packageProductDependencies = (
+				DA000000000000000000002D /* DakPush */,
+			);
+			productName = DakPushExample;
+			productReference = DA0000000000000000000003 /* DakPushExample.app */;
+			productType = com.apple.product-type.application;
+		};
+		DA000000000000000000000B /* NotificationService */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DA0000000000000000000011 /* Build configuration list for PBXNativeTarget "NotificationService" */;
+			buildPhases = (
+				DA000000000000000000000E /* Sources */,
+				DA000000000000000000000F /* Frameworks */,
+				DA0000000000000000000010 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				DA000000000000000000000D /* NotificationService */,
+			);
+			name = NotificationService;
+			packageProductDependencies = (
+				DA000000000000000000002E /* DakPushExtension */,
+			);
+			productName = NotificationService;
+			productReference = DA000000000000000000000C /* NotificationService.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		DA0000000000000000000014 /* DakPushExampleTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DA000000000000000000001A /* Build configuration list for PBXNativeTarget "DakPushExampleTests" */;
+			buildPhases = (
+				DA0000000000000000000017 /* Sources */,
+				DA0000000000000000000018 /* Frameworks */,
+				DA0000000000000000000019 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				DA000000000000000000002B /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				DA0000000000000000000016 /* DakPushExampleTests */,
+			);
+			name = DakPushExampleTests;
+			packageProductDependencies = (
+			);
+			productName = DakPushExampleTests;
+			productReference = DA0000000000000000000015 /* DakPushExampleTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		DA0000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2720;
+				LastUpgradeCheck = 2720;
+				TargetAttributes = {
+					DA0000000000000000000002 = {
+						CreatedOnToolsVersion = 27.2;
+					};
+					DA000000000000000000000B = {
+						CreatedOnToolsVersion = 27.2;
+					};
+					DA0000000000000000000014 = {
+						CreatedOnToolsVersion = 27.2;
+						TestTargetID = DA0000000000000000000002;
+					};
+				};
+			};
+			buildConfigurationList = DA000000000000000000001D /* Build configuration list for PBXProject "DakPushExample" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = DA0000000000000000000020;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				DA000000000000000000002C /* XCLocalSwiftPackageReference ".." */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = DA0000000000000000000022 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				DA0000000000000000000002 /* DakPushExample */,
+				DA000000000000000000000B /* NotificationService */,
+				DA0000000000000000000014 /* DakPushExampleTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		DA0000000000000000000007 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DA0000000000000000000010 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DA0000000000000000000019 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		DA0000000000000000000005 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DA000000000000000000000E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DA0000000000000000000017 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		DA000000000000000000002A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DA000000000000000000000B /* NotificationService */;
+			targetProxy = DA0000000000000000000028 /* PBXContainerItemProxy */;
+		};
+		DA000000000000000000002B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DA0000000000000000000002 /* DakPushExample */;
+			targetProxy = DA0000000000000000000029 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		DA000000000000000000001E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = DA0000000000000000000023 /* Config.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		DA000000000000000000001F /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = DA0000000000000000000023 /* Config.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 5.0;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		DA0000000000000000000009 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = DA0000000000000000000023 /* Config.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Config/DakPushExample.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/App-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "DakPush Example";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(DAK_EXAMPLE_BUNDLE_ID)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		DA000000000000000000000A /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = DA0000000000000000000023 /* Config.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Config/DakPushExample.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/App-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "DakPush Example";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(DAK_EXAMPLE_BUNDLE_ID)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		DA0000000000000000000012 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = DA0000000000000000000023 /* Config.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = Config/NotificationService.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/NotificationService-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = NotificationService;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(DAK_EXAMPLE_BUNDLE_ID).NotificationService";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		DA0000000000000000000013 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = DA0000000000000000000023 /* Config.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = Config/NotificationService.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/NotificationService-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = NotificationService;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(DAK_EXAMPLE_BUNDLE_ID).NotificationService";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		DA000000000000000000001B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = DA0000000000000000000023 /* Config.xcconfig */;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(DAK_EXAMPLE_BUNDLE_ID).tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DakPushExample.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/DakPushExample";
+			};
+			name = Debug;
+		};
+		DA000000000000000000001C /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = DA0000000000000000000023 /* Config.xcconfig */;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(DAK_EXAMPLE_BUNDLE_ID).tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DakPushExample.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/DakPushExample";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		DA000000000000000000001D /* Build configuration list for PBXProject "DakPushExample" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DA000000000000000000001E /* Debug */,
+				DA000000000000000000001F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DA0000000000000000000008 /* Build configuration list for PBXNativeTarget "DakPushExample" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DA0000000000000000000009 /* Debug */,
+				DA000000000000000000000A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DA0000000000000000000011 /* Build configuration list for PBXNativeTarget "NotificationService" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DA0000000000000000000012 /* Debug */,
+				DA0000000000000000000013 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DA000000000000000000001A /* Build configuration list for PBXNativeTarget "DakPushExampleTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DA000000000000000000001B /* Debug */,
+				DA000000000000000000001C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		DA000000000000000000002C /* XCLocalSwiftPackageReference ".." */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ..;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		DA000000000000000000002D /* DakPush */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DA000000000000000000002C /* XCLocalSwiftPackageReference ".." */;
+			productName = DakPush;
+		};
+		DA000000000000000000002E /* DakPushExtension */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DA000000000000000000002C /* XCLocalSwiftPackageReference ".." */;
+			productName = DakPushExtension;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = DA0000000000000000000001 /* Project object */;
+}

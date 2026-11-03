@@ -1,0 +1,9 @@
+.DS_Store
+.build/
+.swiftpm/
+DerivedData/
+xcuserdata/
+*.xcuserstate
+Package.resolved
+# Settings of whoever runs the example (App ID, team, bundle id); never committed.
+Example/Config/Local.xcconfig

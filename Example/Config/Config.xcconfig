@@ -1,0 +1,19 @@
+// The example's settings. Put your own in Config/Local.xcconfig (git-ignored),
+// for example:
+//
+//   DAK_APP_ID = 01a1…                          // App ID from the DakPush dashboard
+//   DAK_BASE_URL = https:/$()/push.example.com  // "/$()/" because // starts a comment here
+//   DEVELOPMENT_TEAM = ABCDE12345               // for a real APNs token
+//   DAK_EXAMPLE_BUNDLE_ID = com.example.dakpush // a bundle id with Push Notifications
+//   DAK_APS_ENVIRONMENT = development           // or production (TestFlight, App Store)
+
+DAK_EXAMPLE_BUNDLE_ID = io.github.hridoyrocks.dakpush.example
+DAK_APP_GROUP = group.$(DAK_EXAMPLE_BUNDLE_ID)
+DAK_APP_ID =
+DAK_BASE_URL = http:/$()/127.0.0.1:8091
+DAK_APS_ENVIRONMENT = development
+
+// Without a team the simulator build is signed to run locally.
+CODE_SIGN_IDENTITY[sdk=iphonesimulator*] = -
+
+#include? "Local.xcconfig"
