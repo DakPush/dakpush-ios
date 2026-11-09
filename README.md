@@ -30,23 +30,23 @@ app's bundle id and the environment: `sandbox` for builds you run from Xcode,
 ## Install
 
 **Swift Package Manager.** In Xcode: File → Add Package Dependencies, enter
-`https://github.com/hridoyrocks/dak-push-ios.git`, and pick 0.1.0. Link
+`https://github.com/DakPush/dakpush-ios.git`, and pick 0.1.0. Link
 `DakPush` to the app and `DakPushExtension` to the notification service
 extension. In a `Package.swift`:
 
 ```swift
-.package(url: "https://github.com/hridoyrocks/dak-push-ios.git", from: "0.1.0")
+.package(url: "https://github.com/DakPush/dakpush-ios.git", from: "0.1.0")
 ```
 
 **CocoaPods.**
 
 ```ruby
 target 'MyApp' do
-  pod 'DakPush', :git => 'https://github.com/hridoyrocks/dak-push-ios.git', :tag => '0.1.0'
+  pod 'DakPush', :git => 'https://github.com/DakPush/dakpush-ios.git', :tag => '0.1.0'
 end
 
 target 'NotificationService' do
-  pod 'DakPushExtension', :git => 'https://github.com/hridoyrocks/dak-push-ios.git', :tag => '0.1.0'
+  pod 'DakPushExtension', :git => 'https://github.com/DakPush/dakpush-ios.git', :tag => '0.1.0'
 end
 ```
 
