@@ -1,5 +1,6 @@
 import DakPush
 import SwiftUI
+import UIKit
 
 @MainActor
 final class ExampleModel: ObservableObject {
@@ -28,6 +29,9 @@ struct ContentView: View {
     @State private var tagKey = "level"
     @State private var tagValue = "b2"
     @State private var subscribed = true
+    @State private var inAppPaused = false
+    @State private var showCall = false
+    @State private var note = ""
     @Environment(\.scenePhase) private var phase
 
     var body: some View {
@@ -73,6 +77,42 @@ struct ContentView: View {
                         }
                     #endif
                 }
+                Section("In-app messages") {
+                    // Triggers: conditions a message can wait for (custom
+                    // triggers in the dashboard). Kept in memory only.
+                    Button("Trigger: screen = home") {
+                        Dak.addTrigger("screen", "home")
+                        model.log("trigger screen = home")
+                    }
+                    Button("Trigger: screen = cart") {
+                        Dak.addTrigger("screen", "cart")
+                        model.log("trigger screen = cart")
+                    }
+                    Button("Trigger: lessons_done = 3") {
+                        Dak.addTrigger("lessons_done", 3)
+                        model.log("trigger lessons_done = 3")
+                    }
+                    Button("Remove all triggers") {
+                        Dak.clearTriggers()
+                        model.log("triggers removed")
+                    }
+                    Toggle("Pause in-app messages", isOn: $inAppPaused)
+                        .onChange(of: inAppPaused) { on in Dak.pauseInApp(on) }
+                    Button("Fetch messages now") {
+                        Task {
+                            await Dak.refreshInApp()
+                            model.log("in-app messages fetched")
+                        }
+                    }
+                    Button("Open a call screen (keeps messages away)") { showCall = true }
+                    if UIApplication.shared.supportsMultipleScenes {
+                        // iPad: a message shows in the window the user is in.
+                        Button("Open another window") {
+                            UIApplication.shared.requestSceneSessionActivation(nil, userActivity: nil, options: nil)
+                        }
+                    }
+                    TextField("Type here: a modal message takes the keyboard", text: $note)
+                }
                 Section("Log") {
                     ForEach(model.lines, id: \.self) { Text($0).font(.caption.monospaced()) }
                 }
@@ -80,6 +120,7 @@ struct ContentView: View {
             .navigationTitle("DakPush")
         }
         .navigationViewStyle(.stack)
+        .fullScreenCover(isPresented: $showCall) { CallScreen { showCall = false } }
         .task { await model.refreshPermission() }
         .onChange(of: phase) { p in if p == .active { Task { await model.refreshPermission() } } }
     }
@@ -98,5 +139,26 @@ struct ContentView: View {
             model.log("permission: \(granted ? "allowed" : "not allowed")\(provisional ? " (provisional)" : "")")
             Task { await model.refreshPermission() }
         }
+    }
+}
+
+/// A screen that must not be covered: in-app messages wait until it closes.
+struct CallScreen: View {
+    let hangUp: () -> Void
+
+    var body: some View {
+        VStack(spacing: 24) {
+            Spacer()
+            Image(systemName: "phone.fill").font(.system(size: 56)).foregroundColor(.green)
+            Text("On a call").font(.title.bold())
+            Text("In-app messages are kept away while this screen is open.")
+                .multilineTextAlignment(.center).foregroundColor(.secondary).padding(.horizontal, 32)
+            Spacer()
+            Button(action: hangUp) {
+                Text("Hang up").bold().frame(maxWidth: .infinity, minHeight: 50)
+            }
+            .buttonStyle(.borderedProminent).tint(.red).padding(.horizontal, 32).padding(.bottom, 24)
+        }
+        .dakInAppBlocked()
     }
 }

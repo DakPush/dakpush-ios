@@ -42,10 +42,11 @@ final class FileStateStore: DakStateStore {
         self.url = url
     }
 
-    /// Application Support/DakPush/state.json.
-    static func standard() -> FileStateStore {
+    /// Application Support/DakPush/[name]: state.json for the client,
+    /// in_app.json for in-app messages.
+    static func standard(_ name: String = "state.json") -> FileStateStore {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        return FileStateStore(url: base.appendingPathComponent("DakPush/state.json"))
+        return FileStateStore(url: base.appendingPathComponent("DakPush/\(name)"))
     }
 
     /// The folder, made on the first write, out of backups.

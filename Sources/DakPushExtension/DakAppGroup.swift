@@ -3,7 +3,7 @@ import os
 
 /// The SDK's version and the User-Agent both modules send.
 @_spi(DakInternal) public enum DakPushInfo {
-    public static let version = "0.1.0"
+    public static let version = "0.2.0"
     public static let userAgent = "dakpush-ios/\(version)"
 }
 

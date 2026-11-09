@@ -46,6 +46,11 @@ final class FakeDak: @unchecked Sendable {
     private var opensStore: [(id: String, action: String?)] = []
     private var receiptsStore: [String] = []
     private var identitySecretStore: String?
+    private var inAppStore: [JSON] = []
+    private var inAppEtagStore = "\"v1\""
+    private var inAppEventsStore: [[String: JSON]] = []
+    private var offlineStore = false
+    private var interceptStore: ((String, String) -> Answer?)?
 
     var baseURL: String { "https://\(host)" }
 
@@ -66,6 +71,38 @@ final class FakeDak: @unchecked Sendable {
 
     var devices: [String: Device] { locked { devicesStore } }
     var calls: [Call] { locked { callsStore } }
+
+    /// The in-app messages every device gets.
+    var inApp: [JSON] {
+        get { locked { inAppStore } }
+        set { locked { inAppStore = newValue } }
+    }
+
+    /// The ETag of the in-app list; If-None-Match with it gets a 304.
+    var inAppEtag: String {
+        get { locked { inAppEtagStore } }
+        set { locked { inAppEtagStore = newValue } }
+    }
+
+    /// In-app events as they came, in order.
+    var inAppEvents: [[String: JSON]] { locked { inAppEventsStore } }
+
+    /// Every call fails as if the phone had no network.
+    var offline: Bool {
+        get { locked { offlineStore } }
+        set { locked { offlineStore = newValue } }
+    }
+
+    /// Answers instead of the normal one when it returns one (method, path).
+    var intercept: ((String, String) -> Answer?)? {
+        get { locked { interceptStore } }
+        set { locked { interceptStore = newValue } }
+    }
+
+    /// A device known to the server, as if it had registered.
+    func addDevice(_ id: String, secret: String) {
+        locked { devicesStore[id] = Device(id: id, secret: secret, fields: ["tags": .object([:])]) }
+    }
 
     /// Answers to give before the normal ones, in order.
     func queue(_ answers: Answer...) {
@@ -108,6 +145,8 @@ final class FakeDak: @unchecked Sendable {
         for (k, v) in request.allHTTPHeaderFields ?? [:] { headers[k.lowercased()] = v }
         let js = body.flatMap(JSON.decodeObject)
         callsStore.append(Call(method: request.httpMethod ?? "GET", path: path, headers: headers, body: js))
+        if offlineStore { return .fail(.notConnectedToInternet) }
+        if let answer = interceptStore?(request.httpMethod ?? "GET", path) { return answer }
         if !queuedStore.isEmpty {
             let next = queuedStore.removeFirst()
             if case .normal = next {} else { return next }
@@ -132,6 +171,21 @@ final class FakeDak: @unchecked Sendable {
                 let ids = js?["message_ids"]?.array?.compactMap(\.string) ?? js?["message_id"]?.string.map { [$0] } ?? []
                 receiptsStore.append(contentsOf: ids)
                 return .status(204)
+            }
+        case ("GET", 2) where rest[1] == "in-app":
+            return withDevice(rest[0], headers) { _ in
+                if headers["if-none-match"] == inAppEtagStore {
+                    return .status(304, headers: ["ETag": inAppEtagStore])
+                }
+                let body = String(decoding: JSON.encode(["messages": .array(inAppStore)]), as: UTF8.self)
+                return .status(200, body: body, headers: ["ETag": inAppEtagStore])
+            }
+        case ("POST", 3) where rest[1] == "in-app" && rest[2] == "events":
+            return withDevice(rest[0], headers) { _ in
+                let events = js?["events"]?.array?.compactMap(\.object) ?? []
+                if events.count > 100 { return error(422, "invalid", "at most 100 events per request", field: "events") }
+                inAppEventsStore.append(contentsOf: events)
+                return .status(200, body: "{\"accepted\":\(events.count)}")
             }
         default:
             return error(404, "not_found", "no route")

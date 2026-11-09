@@ -43,7 +43,7 @@ final class LocalServerTests: XCTestCase {
         let c = DakClient(
             api: api, store: store, secrets: secrets, platform: platform, scheduler: QueueScheduler(),
             callbacks: { $0() }, events: events, log: DakLog(debug: true) { _, m in print(m) },
-            sdkVersion: "ios-0.1.0", shareTimezoneOffset: true, appGroup: group)
+            sdkVersion: "ios-\(Dak.version)", shareTimezoneOffset: true, appGroup: group)
         let token = (0..<32).map { _ in String(format: "%02x", UInt8.random(in: 0...255)) }.joined()
         c.start()
         c.onNewToken(token)
@@ -62,7 +62,7 @@ final class LocalServerTests: XCTestCase {
         let device = try XCTUnwrap(try userDevices(user).first)
         XCTAssertEqual(device["id"] as? String, deviceId)
         XCTAssertEqual(device["platform"] as? String, "ios")
-        XCTAssertEqual(device["sdk_version"] as? String, "ios-0.1.0")
+        XCTAssertEqual(device["sdk_version"] as? String, "ios-\(Dak.version)")
         XCTAssertEqual(device["app_version"] as? String, "1.2.0+7")
         XCTAssertEqual(device["os_version"] as? String, "26.1")
         XCTAssertEqual(device["language"] as? String, "bn")
@@ -111,7 +111,134 @@ final class LocalServerTests: XCTestCase {
         print("dak-it: device \(newId) token \(token)")
     }
 
+    /// In-app messages end to end: the server picks this device's messages,
+    /// the controller shows them by trigger and priority, and the server
+    /// counts the impressions, clicks and dismissals it sends.
+    func testInAppMessagesAgainstTheServer() throws {
+        try XCTSkipIf(
+            [baseURL, appId, identitySecret, restKey].contains(""), "set TEST_RUNNER_DAK_IT_BASE_URL and the others to run it")
+        let http = RecordingHTTP()
+        let api = DakApi(baseURL: DakApi.checkBaseURL(baseURL)!, appId: appId, http: http, userAgent: "dakpush-ios/it")
+        let client = DakClient(
+            api: api, store: MemoryStateStore(), secrets: MemorySecretStore(), platform: FakePlatform(),
+            scheduler: QueueScheduler(), callbacks: { $0() }, events: Events(), log: DakLog(debug: true) { _, m in print(m) },
+            sdkVersion: "ios-\(Dak.version)")
+        client.start()
+        client.onNewToken((0..<32).map { _ in String(format: "%02x", UInt8.random(in: 0...255)) }.joined())
+        try waitFor { client.credentials != nil }
+        let deviceId = try XCTUnwrap(client.currentDeviceId)
+
+        // Two messages for this device only: a modal waiting for a trigger,
+        // and a banner for when the app opens. The highest priorities, so
+        // other messages of the app cannot come first.
+        let modal = try create([
+            "name": "iOS IT modal", "status": "active", "layout": "modal", "priority": 1000,
+            "content": [
+                "title": "নতুন স্পিকিং চ্যালেঞ্জ!", "body": "আজকের বিষয়: ভ্রমণ",
+                "buttons": [
+                    ["id": "join", "text": "শুরু করুন", "action": ["type": "deep_link", "url": "amarpartner://challenge"]],
+                    ["id": "later", "text": "পরে", "action": ["type": "dismiss"]],
+                ],
+            ],
+            "target": ["device_ids": [deviceId]],
+            "triggers": [[["kind": "custom", "key": "screen", "op": "=", "value": "home"]]],
+            "frequency": ["type": "every_session", "max_displays": 3],
+        ])
+        let banner = try create([
+            "name": "iOS IT banner", "status": "active", "layout": "banner_top", "priority": 999,
+            "content": ["title": "Welcome back", "auto_dismiss_seconds": 5],
+            "target": ["device_ids": [deviceId]], "frequency": ["type": "once"],
+        ])
+        defer {
+            _ = try? restJSON("DELETE", "/v1/in-app/\(modal)", nil, expect: 204)
+            _ = try? restJSON("DELETE", "/v1/in-app/\(banner)", nil, expect: 204)
+        }
+
+        let scheduler = TestScheduler()
+        let clicks = Locked<[DakInAppClick]>([])
+        let c = InAppController(
+            api: api, store: MemoryStateStore(), credentials: { client.credentials }, setTags: { _ in }, openURL: nil,
+            home: scheduler, io: scheduler, clock: Date.init, log: DakLog(debug: true) { _, m in print(m) },
+            eventDelay: nil)
+        c.onClick = { click in clicks.update { $0.append(click) } }
+        c.attach("scene")
+        c.start()
+        scheduler.runUntilIdle()
+        // The app may have other messages; these two come first.
+        let mine = { c.messages.map(\.id).filter { [modal, banner].contains($0) } }
+        XCTAssertEqual(Array(c.messages.prefix(2).map(\.id)), [modal, banner], "highest priority first")
+        XCTAssertEqual(c.messages.first?.content.title, "নতুন স্পিকিং চ্যালেঞ্জ!")
+        XCTAssertEqual(c.messages.first?.content.buttons.map(\.text), ["শুরু করুন", "পরে"])
+        XCTAssertEqual(c.current?.id, banner, "the modal waits for its trigger")
+
+        c.didDisplay(c.current!)
+        c.dismiss(c.current!)
+        c.addTriggers(["screen": .string("home")])
+        XCTAssertEqual(c.current?.id, modal)
+        let shown = c.current!
+        c.didDisplay(shown)
+        c.click(shown, button: shown.content.buttons.first)
+        XCTAssertEqual(clicks.value.map(\.buttonId), ["join"])
+        c.flushEvents()
+        scheduler.runUntilIdle()
+        XCTAssertEqual(c.pendingEvents, 0)
+
+        let modalStats = try restJSON("GET", "/v1/in-app/\(modal)", nil)["stats"] as? [String: Any]
+        XCTAssertEqual(modalStats?["impressions"] as? Int, 1)
+        XCTAssertEqual(modalStats?["clicks"] as? Int, 1)
+        XCTAssertEqual((modalStats?["buttons"] as? [String: Int])?["join"], 1)
+        let bannerStats = try restJSON("GET", "/v1/in-app/\(banner)", nil)["stats"] as? [String: Any]
+        XCTAssertEqual(bannerStats?["impressions"] as? Int, 1)
+        XCTAssertEqual(bannerStats?["dismissals"] as? Int, 1)
+
+        // The banner (once) is used up: the server leaves it out now, and an
+        // unchanged list comes back as 304.
+        c.refresh(force: true)
+        scheduler.runUntilIdle()
+        XCTAssertEqual(mine(), [modal])
+        XCTAssertEqual(c.messages.first?.shown, 1, "the server's count for this device")
+        c.refresh(force: true)
+        scheduler.runUntilIdle()
+        XCTAssertEqual(http.statuses.value.suffix(2), [200, 304])
+        XCTAssertEqual(mine(), [modal])
+        c.dispose()
+        client.dispose()
+    }
+
     // MARK: - Helpers
+
+    /// [DakHTTP] that keeps the statuses of the in-app list's answers.
+    private final class RecordingHTTP: DakHTTP, @unchecked Sendable {
+        private let http = URLSessionHTTP()
+        let statuses = Locked<[Int]>([])
+
+        func send(method: String, url: URL, headers: [String: String], body: Data?, timeout: TimeInterval) throws
+            -> DakHTTPResponse
+        {
+            let res = try http.send(method: method, url: url, headers: headers, body: body, timeout: timeout)
+            if url.path.hasSuffix("/in-app") { statuses.update { $0.append(res.status) } }
+            return res
+        }
+    }
+
+    /// Creates an in-app message with the REST API; returns its id.
+    private func create(_ message: [String: Any]) throws -> String {
+        let js = try restJSON("POST", "/v1/in-app", message, expect: 201)
+        return try XCTUnwrap(js["id"] as? String)
+    }
+
+    private func restJSON(_ method: String, _ path: String, _ body: [String: Any]?, expect: Int = 200) throws
+        -> [String: Any]
+    {
+        var headers = ["Authorization": "Bearer \(restKey)"]
+        if body != nil { headers["Content-Type"] = "application/json" }
+        let res = try URLSessionHTTP().send(
+            method: method, url: URL(string: "\(DakApi.checkBaseURL(baseURL)!)\(path)")!, headers: headers,
+            body: try body.map { try JSONSerialization.data(withJSONObject: $0) }, timeout: 10)
+        XCTAssertEqual(res.status, expect, String(decoding: res.body, as: UTF8.self))
+        if res.body.isEmpty { return [:] }
+        return try JSONSerialization.jsonObject(with: res.body) as? [String: Any] ?? [:]
+    }
 
     private func rest(_ method: String, _ path: String) throws -> [String: Any] {
         let http = URLSessionHTTP()

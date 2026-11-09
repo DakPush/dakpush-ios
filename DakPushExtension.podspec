@@ -1,7 +1,7 @@
 # Names and URLs are temporary until the DakPush domain is bought.
 Pod::Spec.new do |s|
   s.name          = 'DakPushExtension'
-  s.version       = '0.1.0'
+  s.version       = '0.2.0'
   s.summary       = 'DakPush notification service extension: images, buttons and delivery receipts.'
   s.description   = <<-DESC
 For the notification service extension of an app that uses DakPush: attaches

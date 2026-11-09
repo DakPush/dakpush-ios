@@ -16,7 +16,11 @@ protocol DakScheduler: AnyObject {
 
 /// [DakScheduler] on a serial dispatch queue.
 final class QueueScheduler: DakScheduler {
-    private let queue = DispatchQueue(label: "dakpush.worker", qos: .utility)
+    private let queue: DispatchQueue
+
+    init(label: String = "dakpush.worker") {
+        queue = DispatchQueue(label: label, qos: .utility)
+    }
 
     func execute(_ task: @escaping () -> Void) {
         queue.async(execute: task)
@@ -25,13 +29,27 @@ final class QueueScheduler: DakScheduler {
     func schedule(after seconds: TimeInterval, _ task: @escaping () -> Void) -> DakCancelable {
         let item = DispatchWorkItem(block: task)
         queue.asyncAfter(deadline: .now() + seconds, execute: item)
-        return Item(item: item)
+        return DispatchItem(item: item)
+    }
+}
+
+/// [DakScheduler] on the main queue: where the in-app messages live, next to
+/// UIKit.
+final class MainQueueScheduler: DakScheduler {
+    func execute(_ task: @escaping () -> Void) {
+        DispatchQueue.main.async(execute: task)
     }
 
-    private struct Item: DakCancelable {
-        let item: DispatchWorkItem
-        func cancel() { item.cancel() }
+    func schedule(after seconds: TimeInterval, _ task: @escaping () -> Void) -> DakCancelable {
+        let item = DispatchWorkItem(block: task)
+        DispatchQueue.main.asyncAfter(deadline: .now() + seconds, execute: item)
+        return DispatchItem(item: item)
     }
+}
+
+private struct DispatchItem: DakCancelable {
+    let item: DispatchWorkItem
+    func cancel() { item.cancel() }
 }
 
 /// Logs to the unified log (subsystem "dakpush"): debug lines only with

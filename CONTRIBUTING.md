@@ -28,13 +28,21 @@ pod lib lint DakPushExtension.podspec && pod lib lint DakPush.podspec --include-
 - **Unit tests** (`Tests/`) run the real client and HTTP code against
   `FakeDak`, a `URLProtocol` that answers like the DakPush server's SDK
   endpoints (registration taking over a token's row, device secrets, identity
-  verification, tag checks, opens and receipts, the receipt token).
+  verification, tag checks, opens and receipts, the receipt token, in-app
+  lists with their ETag and in-app events).
   `TestScheduler` runs the SDK's worker on the test thread with virtual time,
   for retries, backoff and the locked-phone waits. The extension's tests use
   `FakeWeb` for images and receipts.
 - **Hosted tests** (`Example/DakPushExampleTests`) need an app around them:
   the real keychain and its accessibility, file protection, the App Group
-  entitlement. Package tests on the simulator have no keychain.
+  entitlement, and the in-app messages' windows in a real scene (sizes against
+  the dashboard preview, right to left, dark mode, Dynamic Type, VoiceOver,
+  the keyboard, the presenter end to end). With
+  `TEST_RUNNER_DAK_SNAPSHOTS=/some/folder` they also save each layout as a
+  PNG there to look at. Package tests on the simulator have no keychain.
+- **In-app logic** (`InAppControllerTests`) runs the controller against
+  `FakeDak`'s in-app endpoints on a `TestScheduler`: the Flutter SDK's
+  controller tests, ported, plus the iOS parts.
 - **Against a real server** (`LocalServerTests`), skipped unless you point it
   at a running `dak serve` (xcodebuild passes `TEST_RUNNER_X` to the tests as
   `X`):
@@ -68,6 +76,18 @@ sandbox tokens). In automated runs, never tap the system's permission prompts;
 | `Runtime` | What `Dak` keeps: the client, the listeners, taps and receipts from before `initialize`. |
 | `JSON`, `Support` | The JSON the state is made of; the worker queue, logging, small helpers. |
 
+In-app messages (`InApp/`). Public: the `Dak` methods in `Dak+InApp`,
+`DakInAppClick`, `DakInAppActionType`, `DakTriggerValue`, `DakInAppBlock`,
+`DakInAppTheme`, `.dakInAppBlocked()`. The rest is internal:
+
+| File | What it does |
+|---|---|
+| `InAppModel` | The server's JSON, read as strictly as the Flutter SDK reads it. |
+| `InAppController` | The logic (port of the Flutter SDK's `controller.dart`): cache, sessions, triggers, frequency, priority, events. It lives on the main queue in the app, with network and disk on a queue of its own. |
+| `InAppPresenter` | Shows the controller's message in a window per scene, loads the image first, counts the impression once it is on screen. |
+| `InAppViews` | The layouts in UIKit, with the dashboard preview's sizes. |
+| `InAppImages` | Image download (through the extension's `DakImageDownload`) and decoding at the drawn size. |
+
 `DakPushExtension` (the notification service extension's library, safe for
 app extensions). Public: `DakNotificationService`. The rest is SPI
 (`@_spi(DakInternal)`), shared with `DakPush`: the App Group keys
@@ -80,11 +100,12 @@ SDK's; keep them in step when the protocol changes. The category name
 for byte the same as the server's `internal/apns` `Category`;
 `CategoryTests.testTheNameMatchesTheServer` checks the server's golden value.
 
-**In-app messages (0.2)** plug in beside the client, not into it:
-`DakClient.credentials` gives the device id and secret once registered,
-`DakApi.fetchInApp` and `sendInAppEvents` are the endpoints, and `Dak`
-already observes the app coming to the foreground (`observeApp`), where the
-in-app controller would fetch and show.
+**In-app messages** sit beside the client, not in it: they read
+`DakClient.credentials`, hear about registrations through the device id
+event, and follow the app's lifecycle from `Dak.observeApp`. Keep the
+controller in step with the Flutter SDK's `controller.dart` (and the Android
+SDK's) when the in-app protocol changes, and the layouts with the dashboard's
+`InAppPreview.svelte`.
 
 ## Names
 

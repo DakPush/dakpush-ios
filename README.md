@@ -5,11 +5,12 @@ registers the iPhone with your DakPush server straight through APNs (no
 Firebase), links it to your user, keeps tags, and reports deliveries, opens
 and button taps. A small second library for your notification service
 extension adds the push's image and buttons and reports the delivery even
-while the app is not running.
+while the app is not running. In-app messages (modal, banners, full screen,
+card) show inside the app, drawn natively, with no setup.
 
-Swift, iOS 15 and newer. In-app messages come in 0.2.
+Swift, iOS 15 and newer, UIKit and SwiftUI apps.
 
-Version 0.1.0.
+Version 0.2.0.
 
 > **Pre-release.** Installed from GitHub for now. The URLs may change once the
 > product's domain is chosen.
@@ -30,23 +31,23 @@ app's bundle id and the environment: `sandbox` for builds you run from Xcode,
 ## Install
 
 **Swift Package Manager.** In Xcode: File → Add Package Dependencies, enter
-`https://github.com/DakPush/dakpush-ios.git`, and pick 0.1.0. Link
+`https://github.com/DakPush/dakpush-ios.git`, and pick 0.2.0. Link
 `DakPush` to the app and `DakPushExtension` to the notification service
 extension. In a `Package.swift`:
 
 ```swift
-.package(url: "https://github.com/DakPush/dakpush-ios.git", from: "0.1.0")
+.package(url: "https://github.com/DakPush/dakpush-ios.git", from: "0.2.0")
 ```
 
 **CocoaPods.**
 
 ```ruby
 target 'MyApp' do
-  pod 'DakPush', :git => 'https://github.com/DakPush/dakpush-ios.git', :tag => '0.1.0'
+  pod 'DakPush', :git => 'https://github.com/DakPush/dakpush-ios.git', :tag => '0.2.0'
 end
 
 target 'NotificationService' do
-  pod 'DakPushExtension', :git => 'https://github.com/DakPush/dakpush-ios.git', :tag => '0.1.0'
+  pod 'DakPushExtension', :git => 'https://github.com/DakPush/dakpush-ios.git', :tag => '0.2.0'
 end
 ```
 
@@ -207,6 +208,84 @@ Dak.addForegroundListener { n in refreshInbox() }
 Dak.setForegroundPresentation { n in n.data["type"] == "chat" ? [] : [.banner, .list, .sound] }
 ```
 
+## In-app messages
+
+Messages shown inside the app while it is open: a centred modal, a top or
+bottom banner, a full-screen page or a card that slides up. Create them in the
+DakPush dashboard or with the server's REST API (`POST /v1/in-app`); push
+permission is not needed to see them. There is nothing to set up: once
+`Dak.initialize` runs, the SDK fetches them and shows them above your app in a
+window of its own, so UIKit and SwiftUI apps work the same.
+
+```swift
+// Triggers: conditions a message can wait for. Kept in memory only, never sent.
+Dak.addTrigger("screen", "home")
+Dak.addTriggers(["lessons_done": 3, "premium": true])
+Dak.removeTrigger("screen")
+
+// Taps on a message or its buttons. Deep links are yours to route; `url`
+// actions open the browser and `tags` actions set tags by themselves.
+Dak.addInAppClickListener { click in
+    if click.actionType == .deepLink, let url = click.link { router.open(url) }
+    analytics.log("in_app_click", ["message": click.messageId, "button": click.buttonId ?? ""])
+}
+// or: for await click in Dak.inAppClicks { … }
+
+// Keep messages away from screens that must not be covered (a call, a payment):
+let block = Dak.blockInApp()   // until block.end(), or until it is released
+CallScreen().dakInAppBlocked() // SwiftUI: while the view is on screen
+Dak.pauseInApp(true)           // everywhere, until pauseInApp(false)
+
+// The first button takes your app's tint (its AccentColor); to choose:
+Dak.inAppTheme = DakInAppTheme(primary: UIColor(named: "Brand"))
+```
+
+How it works:
+
+- At each session start the SDK fetches the messages this device may see (the
+  server checks the audience, schedule and status) and keeps them, so they
+  also show offline. A new session starts on a cold start or after 5 minutes in
+  the background (`DakOptions(sessionTimeout:)`). A session start waits up to 3
+  seconds for the server, then shows from the cache. `Dak.refreshInApp()`
+  fetches now (at most once a minute).
+- The SDK checks each message's triggers on the phone: session count, time in
+  the session, time since install, and your custom triggers. No triggers means
+  "when the app opens".
+- One message at a time, highest priority first. A message that comes due
+  while another shows follows when it closes. Frequency (`once`,
+  `every_session`, every N seconds, at most N times) is kept on the phone and
+  on the server.
+- Impressions, clicks (with the button id) and dismissals are sent in batches
+  of up to 100, two seconds after the last one and when the app goes to the
+  background. They are saved first, so they survive no network and restarts;
+  the server counts each one once.
+- An image is loaded first (https only, at most 5 MB, 5 seconds) and decoded at
+  the size it is drawn. If it fails, a message with text shows without it; an
+  image-only message waits for the next session.
+- Messages this SDK version cannot show (a newer layout, action or trigger)
+  are skipped. Without a successful fetch for a week, the cached list is not
+  shown: the server may have stopped those messages since.
+- A message that a pause, a block or its scene going to the background hides
+  before the user closed it comes back afterwards, also for `once` messages;
+  it counts as one impression.
+- `url` actions open only `https` and `http` links
+  (`DakOptions(inAppUrlSchemes:)` to allow more, such as `mailto`); the click
+  still reaches the listener.
+- Sizes and spacing are the dashboard preview's. Colours a message leaves out
+  follow the system (dark mode included) and your tint. Text scales with
+  Dynamic Type (buttons stack at the largest sizes), long Bangla text is never
+  clipped, layouts follow right-to-left languages, rotation and iPad windows
+  of any size, and keep above the keyboard.
+- Modal, card and full-screen messages read as a dialog in VoiceOver, take the
+  keyboard focus (Escape or the two-finger scrub closes them) and give it back.
+  Banners are read out when they appear, leave the app usable around them,
+  close with a swipe, and do not close by themselves for VoiceOver users.
+  Reduce Motion fades instead of sliding.
+- With several windows (iPad), a message shows in the one the user is in; it
+  moves to another window in the foreground if its own goes to the background.
+
+`DakOptions(inAppMessages: false)` turns in-app messages off.
+
 ## Notification service extension: images, buttons, receipts
 
 Images and buttons need a notification service extension, and so do delivered
@@ -278,7 +357,10 @@ Dak.initialize(appId: appId, baseURL: baseURL, options: DakOptions(
     shareTimezoneOffset: true,                           // for local-time sends and quiet hours
     foregroundPresentation: [.banner, .list, .sound, .badge],
     registerForRemoteNotifications: true,                // at every start
-    debugLogs: false                                     // Console.app, subsystem "dakpush"
+    debugLogs: false,                                    // Console.app, subsystem "dakpush"
+    inAppMessages: true,                                 // fetch and show in-app messages
+    sessionTimeout: 300,                                 // seconds away that start a new session
+    inAppUrlSchemes: ["https", "http"]                   // what `url` actions open
 ))
 ```
 
@@ -290,10 +372,12 @@ app's timezone (set on the server) is used.
 
 The SDK sends: the APNs token, platform, app version
 (`CFBundleShortVersionString+CFBundleVersion`), iOS and SDK version
-(`ios-0.1.0`), language, whether notifications are allowed (provisional
+(`ios-0.2.0`), language, whether notifications are allowed (provisional
 counts), the user id and tags you set, which pushes arrived and were opened
-(with the button), and the UTC offset only if you turn it on. Nothing else: no
-IP, location, phone number, email or device model.
+(with the button), which in-app messages were shown, tapped (with the button)
+or closed, and the UTC offset only if you turn it on. Nothing else: no IP,
+location, phone number, email or device model. In-app triggers never leave
+the phone.
 
 Its state (device id, what the server last accepted, changes not yet sent) is
 a small file in Application Support/DakPush: left out of backups (a restored
@@ -303,7 +387,9 @@ on a locked phone can still read it. The device secret is in the keychain,
 readable after the first unlock and on this device only. On a phone that has
 not been unlocked since it started, the SDK waits for the unlock and never
 writes over state it could not read. The device secret is sent only to your
-`baseURL`; the extension gets only a receipt token derived from it.
+`baseURL`; the extension gets only a receipt token derived from it. In-app
+messages, their counts and the events not yet sent are a second file there
+(`in_app.json`), kept the same way.
 
 Both libraries include a privacy manifest (`PrivacyInfo.xcprivacy`).
 
@@ -341,6 +427,12 @@ the server pauses APNs sending and the dashboard offers to switch.
 `application(_:didFinishLaunchingWithOptions:)`; see
 [Why the SDK does not swizzle](#why-the-sdk-does-not-swizzle).
 
+**In-app messages do not show.** The device must be registered (a device id),
+the app in the foreground, and nothing paused or blocked (`Dak.isInAppPaused`).
+Check the message's audience, schedule and triggers in the dashboard; custom
+trigger keys must match exactly. With `debugLogs`, the log says when a message
+is skipped (a version that cannot show it) or the fetch failed.
+
 **No image or buttons, or no delivered count while the app is closed.** The
 notification service extension is missing, or the App Group is not the same
 in the app, the extension's entitlements and its `DakAppGroup` (Console.app
@@ -361,7 +453,9 @@ DAK_EXAMPLE_BUNDLE_ID = com.example.dakpush
 (`/$()/` because `//` starts a comment in xcconfig files.) Then open
 `Example/DakPushExample.xcodeproj` and run. Without a team the simulator build
 is signed to run locally; its "Use a made-up token" button registers without
-APNs, to try the rest against a local `dak serve`.
+APNs, to try the rest against a local `dak serve`. Its in-app section sets
+triggers, pauses messages, fetches now and opens a call screen that keeps
+messages away; the log shows the clicks.
 
 ## Development
 

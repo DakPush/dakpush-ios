@@ -30,17 +30,36 @@ public struct DakOptions: Sendable {
     /// Log what the SDK does (Console.app, subsystem "dakpush").
     public var debugLogs: Bool
 
+    /// Show in-app messages. With false the SDK never fetches or shows them.
+    public var inAppMessages: Bool
+
+    /// Back from the background after this long starts a new session, for
+    /// in-app triggers (session count, time in the session) and frequency
+    /// ("every session"). A cold start always does. 5 minutes by default.
+    public var sessionTimeout: TimeInterval
+
+    /// The schemes an in-app message's `url` action opens; others are not
+    /// opened (the click listener still gets the click). Add `mailto` or
+    /// `tel` if your messages use them.
+    public var inAppUrlSchemes: Set<String>
+
     public init(
         appGroup: String? = nil,
         shareTimezoneOffset: Bool = false,
         foregroundPresentation: UNNotificationPresentationOptions = [.banner, .list, .sound, .badge],
         registerForRemoteNotifications: Bool = true,
-        debugLogs: Bool = false
+        debugLogs: Bool = false,
+        inAppMessages: Bool = true,
+        sessionTimeout: TimeInterval = 300,
+        inAppUrlSchemes: Set<String> = ["https", "http"]
     ) {
         self.appGroup = appGroup
         self.shareTimezoneOffset = shareTimezoneOffset
         self.foregroundPresentation = foregroundPresentation
         self.registerForRemoteNotifications = registerForRemoteNotifications
         self.debugLogs = debugLogs
+        self.inAppMessages = inAppMessages
+        self.sessionTimeout = sessionTimeout
+        self.inAppUrlSchemes = inAppUrlSchemes
     }
 }

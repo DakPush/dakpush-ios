@@ -41,6 +41,10 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         Dak.addErrorListener { [model] e in
             model.log("refused: \(e.code) \(e.field ?? "") \(e.message)")
         }
+        // Taps on in-app messages: deep links are the app's to route.
+        Dak.addInAppClickListener { [model] click in
+            model.log("in-app click \(click.messageId.prefix(8)) button \(click.buttonId ?? "-") \(click.actionType.rawValue) \(click.url ?? "")")
+        }
         model.started = true
         return true
     }

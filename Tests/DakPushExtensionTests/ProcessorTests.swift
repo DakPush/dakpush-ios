@@ -134,7 +134,7 @@ final class ProcessorTests: XCTestCase {
         let sent = try XCTUnwrap(FakeWeb.requests.first)
         XCTAssertEqual(sent.httpMethod, "POST")
         XCTAssertEqual(sent.value(forHTTPHeaderField: "Authorization"), "Receipt rt")
-        XCTAssertEqual(sent.value(forHTTPHeaderField: "User-Agent"), "dakpush-ios/0.1.0")
+        XCTAssertEqual(sent.value(forHTTPHeaderField: "User-Agent"), "dakpush-ios/0.2.0")
         XCTAssertEqual(try JSONSerialization.jsonObject(with: sent.httpBody!) as? [String: String], ["message_id": "m1"])
         XCTAssertTrue(group.keptReceipts.isEmpty)
         XCTAssertEqual(group.extensionSchema, DakAppGroup.schema)
@@ -189,7 +189,7 @@ final class ProcessorTests: XCTestCase {
         FakeWeb.set("/a.png", .init(headers: ["Content-Type": "image/png"], body: Self.png))
         let out = process(request(["fcm_options": ["image": "https://img.ext.test/a.png"]]))
         XCTAssertEqual(out?.attachments.count, 1)
-        XCTAssertEqual(FakeWeb.requests.first?.value(forHTTPHeaderField: "User-Agent"), "dakpush-ios/0.1.0")
+        XCTAssertEqual(FakeWeb.requests.first?.value(forHTTPHeaderField: "User-Agent"), "dakpush-ios/0.2.0")
     }
 
     func testImagesThatAreNotImagesOrTooBigOrHttpAreSkipped() {

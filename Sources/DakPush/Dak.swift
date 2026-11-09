@@ -27,7 +27,7 @@ public enum Dak {
     public static let version = DakPushInfo.version
 
     static let runtime = DakRuntime()
-    private static let tagKey = try! NSRegularExpression(pattern: "^[A-Za-z0-9_.:-]{1,64}$")
+    static let tagKey = try! NSRegularExpression(pattern: "^[A-Za-z0-9_.:-]{1,64}$")
 
     /// Starts the SDK. Call it in `application(_:didFinishLaunchingWithOptions:)`,
     /// so the tap that started the app is seen. Later calls do nothing.
@@ -79,6 +79,7 @@ public enum Dak {
         onMain {
             runtime.protectedData.value = UIApplication.shared.isProtectedDataAvailable
             guard runtime.install(client, options: options, log: log, appGroup: group) else { return }
+            if options.inAppMessages { startInApp(api: api, client: client, options: options, log: log) }
             observeApp(client)
             if options.registerForRemoteNotifications {
                 runtime.tokenState.update { if case .none = $0 { $0 = .asked(Date()) } }
@@ -427,27 +428,55 @@ public enum Dak {
         }
     }
 
-    /// Lifecycle: resume, unlock, and setup checks in debug builds.
+    /// Lifecycle: resume, background, unlock, and setup checks in debug builds.
     @MainActor
     private static func observeApp(_ client: DakClient) {
         let center = NotificationCenter.default
         runtime.observers = [
             center.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { _ in
                 client.onResume()
-                #if DEBUG
-                    MainActor.assumeIsolated { checkSetup() }
-                #endif
+                MainActor.assumeIsolated {
+                    inApp.controller?.lifecycle(foreground: true)
+                    #if DEBUG
+                        checkSetup()
+                    #endif
+                }
+            },
+            center.addObserver(forName: UIApplication.didEnterBackgroundNotification, object: nil, queue: .main) { _ in
+                MainActor.assumeIsolated { inAppToBackground() }
             },
             center.addObserver(forName: UIApplication.protectedDataDidBecomeAvailableNotification, object: nil, queue: .main) {
                 _ in
                 runtime.protectedData.value = true
                 client.retryLoad()
+                MainActor.assumeIsolated { inApp.controller?.retryLoad() }
             },
             center.addObserver(forName: UIApplication.protectedDataWillBecomeUnavailableNotification, object: nil, queue: .main) {
                 _ in
                 runtime.protectedData.value = false
             },
         ]
+    }
+
+    /// The app went to the background: in-app events still waiting are sent,
+    /// with the few seconds iOS gives for it.
+    @MainActor
+    private static func inAppToBackground() {
+        guard let controller = inApp.controller else { return }
+        let app = UIApplication.shared
+        let task = Locked(UIBackgroundTaskIdentifier.invalid)
+        let end: @Sendable () -> Void = {
+            let id = task.update { t -> UIBackgroundTaskIdentifier in
+                let id = t
+                t = .invalid
+                return id
+            }
+            // Both callers run on the main thread: ended before they return.
+            if id != .invalid { onMain { UIApplication.shared.endBackgroundTask(id) } }
+        }
+        task.value = app.beginBackgroundTask(withName: "DakPush in-app events", expirationHandler: end)
+        controller.lifecycle(foreground: false)
+        controller.flushEvents(completion: end)
     }
 
     /// Debug builds: setup mistakes that would make taps or tokens go unseen.

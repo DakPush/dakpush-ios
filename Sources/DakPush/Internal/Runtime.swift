@@ -20,6 +20,9 @@ final class DakRuntime: DakClientEvents, @unchecked Sendable {
     let opened = DakOpenedListeners()
     let foreground = DakListeners<DakForegroundListener>()
     let errors = DakListeners<DakErrorListener>()
+    let inAppClicks = DakListeners<DakInAppClickListener>()
+    /// Whether in-app messages are paused, readable from any thread.
+    let inAppPaused = Locked(false)
     let deviceIds: DakDeviceIdListeners
     let foregroundChooser = Locked<(@Sendable (DakNotification) -> UNNotificationPresentationOptions)?>(nil)
     let protectedData = Locked(true)
@@ -141,6 +144,14 @@ final class DakRuntime: DakClientEvents, @unchecked Sendable {
 
     func deviceId(_ id: String) {
         deviceIds.dispatch(id)
+        // In-app messages wait for the device: fetch its list.
+        DispatchQueue.main.async { MainActor.assumeIsolated { Dak.inApp.controller?.onRegistered() } }
+    }
+
+    /// A tap on an in-app message, for the listeners.
+    func inAppClick(_ click: DakInAppClick) {
+        let all = inAppClicks.all
+        if !all.isEmpty { DispatchQueue.main.async { for l in all { l(click) } } }
     }
 
     func error(_ error: DakError) {
