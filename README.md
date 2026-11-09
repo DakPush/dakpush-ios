@@ -11,8 +11,8 @@ Swift, iOS 15 and newer. In-app messages come in 0.2.
 
 Version 0.1.0.
 
-> **Pre-release.** Nothing is published to a registry yet, and the URLs in the
-> podspecs are temporary until the product's domain is chosen.
+> **Pre-release.** Installed from GitHub for now. The URLs may change once the
+> product's domain is chosen.
 
 ## Requirements
 
@@ -29,20 +29,24 @@ app's bundle id and the environment: `sandbox` for builds you run from Xcode,
 
 ## Install
 
-**Swift Package Manager.** Until it is published, add the folder as a local
-package (File → Add Package Dependencies → Add Local…), or a git URL once
-there is one. Link `DakPush` to the app and `DakPushExtension` to the
-notification service extension.
+**Swift Package Manager.** In Xcode: File → Add Package Dependencies, enter
+`https://github.com/hridoyrocks/dak-push-ios.git`, and pick 0.1.0. Link
+`DakPush` to the app and `DakPushExtension` to the notification service
+extension. In a `Package.swift`:
+
+```swift
+.package(url: "https://github.com/hridoyrocks/dak-push-ios.git", from: "0.1.0")
+```
 
 **CocoaPods.**
 
 ```ruby
 target 'MyApp' do
-  pod 'DakPush', :path => '../dak-push-ios'
+  pod 'DakPush', :git => 'https://github.com/hridoyrocks/dak-push-ios.git', :tag => '0.1.0'
 end
 
 target 'NotificationService' do
-  pod 'DakPushExtension', :path => '../dak-push-ios'
+  pod 'DakPushExtension', :git => 'https://github.com/hridoyrocks/dak-push-ios.git', :tag => '0.1.0'
 end
 ```
 
